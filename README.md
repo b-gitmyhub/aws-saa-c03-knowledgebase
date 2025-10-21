@@ -38,14 +38,6 @@ mkdocs serve
 
 Browse locally at http://127.0.0.1:8000.
 
-## Going Public Later
-
-1. Set repo visibility → Public  
-2. Enable GitHub Pages (Settings → Pages → GitHub Actions)  
-3. Push → your site appears at  
-
-https://<your-username>.github.io/aws-saa-c03-knowledgebase/
-
 ## Learning Philosophy
 
 "Automation is not about removing humans from the loop—it’s about amplifying human intent."
