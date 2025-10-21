@@ -14,6 +14,12 @@ nav:
   - EC2: EC2.md
   - EBS: EBS.md
   - EFS: EFS.md
+  - Quizzes:
+      - Overview: quizzes/index.md
+      - IAM Quiz: quizzes/IAM.md
+      - EC2 Quiz: quizzes/EC2.md
+      - EBS Quiz: quizzes/EBS.md
+      - EFS Quiz: quizzes/EFS.md
 plugins:
   - search
 markdown_extensions:

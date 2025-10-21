@@ -22,11 +22,12 @@ Inspired by: Applied Systems Automation for Knowledge Architectures.
 ## Folder Structure
 
 aws-saa-c03-knowledgebase/
-├── notes_raw/        # Source notes
-├── docs/             # Generated Markdown
-├── scripts/          # Transformation logic
-├── .github/workflows # Automation (CI/CD)
-├── mkdocs.yml        # MkDocs configuration
+├── notes_raw/         # Source notes
+├── docs/              # Generated Markdown
+├── scripts/           # Transformation logic
+├── .github/
+│   └── workflows/     # Automation (CI/CD)
+├── mkdocs.yml         # MkDocs configuration
 └── README.md
 
 ## Local Usage (Private Mode)
