@@ -1,6 +1,6 @@
 site_name: AWS SAA-C03 Knowledge Base
 site_description: Auto-generated study notes for the SAA-C03 exam
-site_url: https://<your-username>.github.io/aws-saa-c03-knowledgebase/
+site_url: https://b-gitmyhub.github.io/aws-saa-c03-knowledgebase/
 theme:
   name: material
   features:
