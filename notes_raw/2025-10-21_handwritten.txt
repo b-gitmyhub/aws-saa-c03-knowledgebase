@@ -1,0 +1,222 @@
+--- Page 1 ---
+EBS Multi-Attach - io1/io2 family
+
+- Attach the same volume to multiple EC2 instances in the same AZ
+- Each instance has full read-write permissions to the high performance volume
+- Use case:
+    - achieve higher app availability in clustered linux applications
+    - apps must manage concurrent write ops.
+    [diagram: AZ1 with EC2 instances and io2 volume]
+
+- Up to MAX 16 EC2 instances at a time
+- Must use filesystem that is cluster-aware
+
+EBS Encryption
+When you create an encrypted EBS volume you get the following
+- Data at rest is encrypted
+- Data in flight between instance and volume is encrypted
+- Snapshots are encrypted (ALL)
+- Volumes created from encrypted snapshots are encrypted
+- Encryption/decryption are handled transparently
+- Encryption has minimal impact on latency
+- EBS Encryption leverages keys from KMS (AES-256)
+- Copying an unencrypted volume allows encryption
+- Snapshots of encrypted volumes are encrypted
+
+Amazon EFS — Elastic File System
+- Managed NFS (Network File System) that can be mounted on many EC2
+- EFS works with EC2 instances in many AZ
+- Highly available, scalable, expensive (3x gp2), pay per use
+- Use case:
+    - content management
+    - web serving
+    - data sharing
+    - Wordpress
+- Uses NFSv4.1 protocol
+- Uses security group to control access to EFS
+- Compatible with Linux-based AMI (not with Windows one)
+- POSIX file system (on Linux) that has a standard file API
+- File system scales automatically, pay per use, no capacity planning
+
+--- Page 2 ---
+IAM - Password Policy
+
+Strong passwords → higher security for the account
+
+Enforce password policies by:
+- setting minimum password length
+- require specific characters
+    - uppercase letters
+    - lowercase letters
+    - numbers
+    - non-alphanumeric chars
+- allow all IAM users to change their own passwords
+- set password expiration
+- prevent password reuse
+
+Enforce multi factor authentication: MFA = password + security device (you know) (you own)
+
+AWS accepted MFA types:
+- Virtual MFA device → Google Authenticator, Authy
+- U2F security key (Universal Two Factor) Example: Yubikey (3P)
+- Hardware Key Fob MFA Device Example: Gemalto (3P)
+- AWS GovCloud (US) Example: SurePassID (3P)
+- Hardware time-based One Time Password (TOTP)
+
+AWS Access
+- AWS Management Console (password + MFA)
+- AWS Command Line Interface (CLI) (access keys)
+- AWS Software Development Kit (SDK) (access keys)
+- Access Key ID = username
+  Secret Access Key = password
+- AWS CloudShell → Terminal (Web) in the AWS cloud
+
+IAM Roles for services
+An IAM role is a virtual identity within your AWS account that is not associated with a specific user. Instead, it has a set of permissions attached to it.
+Purpose: Roles are designed to allow AWS services to perform actions on your behalf.
+Example: EC2, Lambda…
+
+IAM Security Tools
+- IAM credential report (account-level) → reports all your accounts, users, and cred. status (password, access key, last access)
+- IAM Access Advisor (user-level) → shows service permissions granted to user and when service was last used. This data can be used to revise policies.
+
+--- Page 3 ---
+EFS - Performance & Storage Class
+
+- EFS Scale
+  * 1000s of concurrent NFS clients, 10 GB/s+ throughput
+  * Grows to Petabyte-scale network file system, automatically
+
+- Performance Mode (set at EFS creation time)
+  * General Purpose (default) → latency-sensitive use cases (web server, CMS, etc.)
+  * MAX IO → Higher latency / throughput, highly parallel (big data, media processing)
+
+- Throughput Mode
+  * Bursting — 1TB = 50MiB/s + burst up to 100MiB/s
+  * Provisioned — set your throughput regardless of storage size
+  * Elastic — automatically scales throughput up or down based on your workload
+      - Up to 3 GiB/s for reads and 1 GiB/s writes
+      - Used for unpredictable workloads
+
+EFS - Storage Classes
+- Storage Tiers (lifecycle management feature) → Move a file after N days
+  * Standard — for frequent accessed files
+  * Infrequent access (EFS-IA) — cost to retrieve files, lower price to store
+  * Archive — rarely accessed objs (few times each year), 80% less cheaper
+  * Implement lifecycle policies to move file between storage tiers
+
+Availability and durability
+- Standard: Multi-AZ, great for prod
+- One Zone: One AZ, great for dev, backup enabled by default, compatible with IA (EFS One Zone - IA)
+
+- Over 80% in cost savings if managed correctly
+
+--- Page 4 ---
+IAM Guideline & Best Practices
+
+- Don’t use root account except for account setup
+- Each physical user should have its own AWS user
+- Assign users to groups and assign permissions to groups
+- Create a strong password policy
+- Use and enforce MFA
+- Create and use Roles for AWS services
+- Use access keys for programmatic access (CLI/SDK)
+- Audit permissions using IAM Credential Report and Access Advisor
+- Never share IAM user’s access keys
+
+Amazon EC2
+
+EC2 → Elastic Compute Cloud → infrastructure as a service
+- renting virtual machines (EC2)
+- storing data on virtual drives (EBS)
+- distributing load across machines (ELB)
+- scaling services using Auto Scaling Group (ASG)
+
+Sizing and Configuration Options
+- OS: Linux, Windows, Mac
+- Compute power (CPU)
+- RAM
+- Storage → EBS, EFS, EC2 Instance Store
+- Network Card
+- Firewall rules → Security Groups
+- Bootstrap script (EC2 User Data)
+
+Bootstrapping: launching commands when machine starts
+- Script only runs once at the instance first start
+- Runs as root user
+- Data is used to automate tasks: installing updates, software, downloading files from internet, whatever
+
+--- Page 5 ---
+EBS → Elastic Block Store
+
+Network drive → can have some latency due to network
+- Allows instances to persist data even after their termination
+- Some EBS can be multi-attach
+- Bound to specific AZ → can be moved to other AZ using snapshots
+- Free tier 30GB of EBS storage per month
+- Need to specify capacity in advance (size in GB, and IOPS)
+- Delete on termination attribute
+  * root volume by default has the flag on (Delete on termination)
+  * other volumes by default do not have the flag set
+
+EBS Snapshots
+The snapshot is a backup of your EBS volume. There is no need to detach the volume to take the snapshot but is recommended.
+
+Features:
+- EBS snapshot archive → 75% cheaper, takes 24-72 hrs to restore
+- Recycle Bin for EBS snapshots → used to retain deleted snapshots
+- Specify retention (from 1 day to years)
+- Fast snapshot restore → faster initialization of snapshot to have low latency on the first use. Has a big cost.
+
+AMI → Amazon Machine Image
+It’s a customization of an EC2 instance.
+- You can add your own software, configuration, OS, monitoring
+- Faster boot / config time
+- Are built for a specific region
+- Can be launched from:
+  * A public AMI → AWS provided
+  * Your own AMI → you build and maintain yourself
+  * An AWS Marketplace AMI → an AMI someone else made (and possibly sells)
+
+AMI process (from an EC2 instance)
+- Start an instance and customize it
+- Stop the instance (to ensure data integrity)
+- Build an AMI → this will create EBS snapshots
+- Launch instance from other AMI
+
+--- Page 6 ---
+IAM - Identity and Access Management
+It’s a global service
+
+- Root account created by default
+- Users = people within the org
+- Groups → only contain users, not other groups
+  * user can belong to more groups
+
+IAM Permissions
+Users and groups can be assigned policies (JSON document)
+Policies define user permissions → least privilege principle (don’t give more permissions than a user needs)
+
+IAM policies inheritance
+- inline policy → attached directly to user
+- users inherit the permissions from the groups they belong to, so one user belonging to two groups will inherit more policies.
+
+IAM policies structure
+{
+  "Version": "2022-10-17",
+  "Id": "S3-Account-Permissions",
+  "Statement": [
+    {
+      "Sid": "1",
+      "Effect": "Allow",
+      "Principal": { "AWS": "arn:aws:iam::123456789012:root" },
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::mybucket/*"
+    }
+  ]
+}
+
+ARN → Amazon Resource Name

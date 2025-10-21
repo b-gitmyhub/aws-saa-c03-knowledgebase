@@ -1,0 +1,23 @@
+site_name: AWS SAA-C03 Knowledge Base
+site_description: Auto-generated study notes for the SAA-C03 exam
+site_url: https://<your-username>.github.io/aws-saa-c03-knowledgebase/
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - content.code.copy
+    - toc.integrate
+nav:
+  - Home: index.md
+  - IAM: IAM.md
+  - EC2: EC2.md
+  - EBS: EBS.md
+  - EFS: EFS.md
+plugins:
+  - search
+markdown_extensions:
+  - toc:
+      permalink: true
+      slugify: !!python/name:markdown.extensions.toc.slugify
+      separator: "-"
