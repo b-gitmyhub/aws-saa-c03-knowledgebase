@@ -1,40 +1,71 @@
-# AWS SAA-C03 Knowledge Base (Automated)
+# AWS SAA-C03 Knowledge Base
 
-This repo turns your raw study notes into a searchable, pretty documentation site and deploys it with GitHub Pages.
+> A living, self-updating knowledge system for the AWS Solutions Architect Associate (SAA-C03) exam.
 
-## How it works
+## Vision
 
-1. Put raw notes in `notes_raw/` as `.txt` files.
-2. On push, GitHub Actions runs `scripts/transform_notes.py` which creates Markdown in `docs/` organized by topics (IAM, EC2, EBS, EFS).
-3. MkDocs builds a static site from `docs/`.
-4. The site is deployed to GitHub Pages automatically.
+This project began as handwritten notes and evolved into an automated learning environment.
+Each new note—whether text, OCR, or quick snippet—flows through a Python pipeline
+that cleans, organizes, and publishes it into a searchable documentation site.
 
-## One-time setup
+Goal: study once, retain forever.  
+Method: automation, reflection, and incremental improvement.  
+Inspired by: Applied Systems Automation for Knowledge Architectures.
 
-1. Create a repo named `aws-saa-c03-knowledgebase` (or any name).
-2. Copy this project into it and push to `main`.
-3. In GitHub: **Settings → Pages → Build and deployment: GitHub Actions**.
-4. Wait for the first workflow to finish; your site will appear at `https://<your-username>.github.io/<repo>/`.
+## How It Works
 
-## Adding new notes
+1. Raw Input → drop study notes (`.txt`) into `/notes_raw/`
+2. Transformation → `scripts/transform_notes.py` routes content into topics (IAM, EC2, EBS, EFS)
+3. Output → Markdown files in `/docs/` with headings and index
+4. Publishing → GitHub Actions builds privately now; can deploy later to GitHub Pages
 
-- Drop a new `.txt` into `notes_raw/` (e.g., `2025-10-28_ec2_networking.txt`).
-- Commit and push. The pipeline will re-build the docs and deploy.
+## Folder Structure
 
-## Local preview
+aws-saa-c03-knowledgebase/
+├── notes_raw/        # Source notes
+├── docs/             # Generated Markdown
+├── scripts/          # Transformation logic
+├── .github/workflows # Automation (CI/CD)
+├── mkdocs.yml        # MkDocs configuration
+└── README.md
 
-```bash
+## Local Usage (Private Mode)
+
 pip install mkdocs mkdocs-material
 python scripts/transform_notes.py
 mkdocs serve
-```
 
-Open http://127.0.0.1:8000
+Browse locally at http://127.0.0.1:8000.
 
-## Customize topics
+## Going Public Later
 
-Edit `TOPIC_MAP` in `scripts/transform_notes.py` to add S3, VPC, RDS, etc.
+1. Set repo visibility → Public  
+2. Enable GitHub Pages (Settings → Pages → GitHub Actions)  
+3. Push → your site appears at  
+
+https://<your-username>.github.io/aws-saa-c03-knowledgebase/
+
+## Learning Philosophy
+
+"Automation is not about removing humans from the loop—it’s about amplifying human intent."
+
+Every `.txt` file you add expands your knowledge base and chronicles your progress as a learning engineer.
 
 ## License
 
-Choose the license you prefer (MIT is common for notes). See `LICENSE` if provided.
+This work is licensed under the  
+[Creative Commons Attribution-NonCommercial 4.0 International License](LICENSE).
+
+You may share and adapt these materials for non-commercial purposes.  
+Commercial use requires permission from the author.
+
+## Contributions
+
+Feel free to fork and extend.  
+Follow the topic-mapping convention in `scripts/transform_notes.py`.
+
+## Author
+
+Iulian B.
+ 
+GitHub → [@b-gitmyhub](https://github.com/b-gitmyhub)
