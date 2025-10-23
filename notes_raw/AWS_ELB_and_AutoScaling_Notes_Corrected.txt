@@ -1,0 +1,208 @@
+AWS ELB (Elastic Load Balancing) and Auto Scaling Overview
+======================================================
+
+What is Load Balancing?
+-----------------------
+Load balancing is the process of distributing network or application traffic across multiple computing resources to ensure optimal performance, reliability, and scalability.
+
+Load balancers are devices or services that forward traffic to multiple downstream devices (servers, e.g., EC2 instances).
+
+Why Use a Load Balancer?
+------------------------
+- Distribute load across multiple downstream instances.
+- Expose a single point of access (DNS) for your application.
+- Seamlessly handle failures of downstream instances.
+- Perform regular health checks for your instances.
+- Provide SSL termination (HTTPS) for your websites.
+- Enforce stickiness with cookies.
+- Utilize multiple Availability Zones.
+- Separate public traffic from private traffic.
+
+Why Use AWS ELB?
+----------------
+- ELB is a managed load balancer; AWS takes care of:
+  - Scaling
+  - Maintenance
+  - High availability
+  - Simplified configuration
+- Costs less and requires less effort than setting up your own load balancer.
+- Integrated with many AWS services:
+  - EC2, EC2 Auto Scaling Groups, ECS
+  - ACM (AWS Certificate Manager), CloudWatch
+  - Route 53, AWS WAF, AWS Global Accelerator
+
+Health Checks
+-------------
+Health checks are crucial for load balancers as they enable them to determine whether instances are available to receive traffic.
+
+- Health checks are performed over a protocol (HTTP, HTTPS, TCP) and a route (e.g., /health).
+- If an instance fails health checks, it is automatically removed from the load balancer’s routing.
+
+Types of Load Balancers on AWS
+------------------------------
+AWS provides four main types of load balancers:
+
+1. **CLB (Classic Load Balancer)** – 2008 (v1)
+   - Legacy generation; still supported but not recommended for new deployments.
+   - Supports HTTP, HTTPS, TCP, SSL (deprecated in favor of ALB and NLB).
+
+2. **ALB (Application Load Balancer)** – 2016 (v2)
+   - Operates at Layer 7.
+   - Supports HTTP, HTTPS, and WebSockets.
+   - [Added by AI] Supports advanced routing based on host, path, headers, and query strings.
+   - Supports redirect and fixed response actions.
+   - Provides native support for AWS Lambda functions as targets.
+
+3. **NLB (Network Load Balancer)** – 2017 (v2)
+   - Operates at Layer 4.
+   - Supports TCP, UDP, and TLS traffic.
+   - Can handle millions of requests per second with ultra-low latency.
+   - Supports assigning Elastic IP addresses per AZ.
+   - [Added by AI] Supports TLS offloading and client IP preservation.
+
+4. **GWLB (Gateway Load Balancer)** – 2020 (v2)
+   - Operates at Layer 3 (network).
+   - Uses the GENEVE protocol on port 6081.
+   - Deploys, scales, and manages third-party virtual network appliances (e.g., firewalls, intrusion detection systems).
+   - Combines transparent network gateway and load balancer functions.
+
+Load Balancer Security Groups
+-----------------------------
+- The load balancer must allow inbound traffic from anywhere (source: 0.0.0.0/0) unless restricted by design.
+- Application instances should allow inbound traffic only from the load balancer’s security group.
+
+ALB (Application Load Balancer) Details
+---------------------------------------
+- Works at Layer 7.
+- Supports routing to multiple target groups across EC2, ECS, and Lambda.
+- [Added by AI] Can route traffic based on path patterns, hostnames, HTTP headers, query strings, and methods.
+- Supports HTTP/2 and WebSocket protocols.
+- Provides native redirection (HTTP → HTTPS).
+- Target types: EC2 instances, IP addresses, Lambda functions, Application Load Balancers.
+- Great fit for microservices and container-based architectures (ECS, EKS).
+- Provides sticky sessions, SSL termination, and Web Application Firewall integration.
+
+NLB (Network Load Balancer) Details
+-----------------------------------
+- Operates at Layer 4.
+- Forwards TCP, UDP, and TLS traffic to targets.
+- Handles very high throughput and low latency workloads.
+- Each NLB has a static IP per AZ.
+- [Added by AI] NLB supports cross-zone load balancing and connection termination for TLS.
+- Target groups can include EC2 instances, IP addresses, and ALBs.
+
+GWLB (Gateway Load Balancer) Details
+------------------------------------
+- Operates at Layer 3.
+- Used for network appliances (e.g., firewalls, deep packet inspection tools).
+- [Added by AI] Integrates with AWS Transit Gateway for hybrid networking setups.
+- Target groups can include EC2 instances or IP addresses (must be private).
+
+Auto Scaling Group (ASG)
+------------------------
+An ASG automatically creates and terminates EC2 instances based on application demand.
+
+Goals of ASG:
+- Scale out (add EC2 instances) when load increases.
+- Scale in (remove EC2 instances) when load decreases.
+- Maintain minimum and maximum number of instances.
+- Automatically register new instances with load balancers.
+- Replace unhealthy instances automatically.
+
+Auto Scaling Group Attributes:
+- Launch template (AMI + instance type)
+- EC2 user data
+- EBS volumes
+- Security groups
+- SSH key pair
+- IAM roles
+- Network and subnet info
+- Load balancer info
+- Min size / Max size / Desired capacity
+
+Auto Scaling with CloudWatch
+----------------------------
+- Scaling actions are triggered by CloudWatch alarms.
+- Metrics can be standard (e.g., CPU Utilization) or custom.
+- [Added by AI] Common metrics: Average CPU, RequestCount, NetworkIn/Out, Latency.
+- Policies can be:
+  - **Scale-out** (add instances)
+  - **Scale-in** (remove instances)
+
+ASG Scaling Policies
+--------------------
+1. **Dynamic Scaling**
+   - Target tracking scaling: automatically adjusts capacity to maintain a target metric (e.g., CPU usage 60%).
+   - Step scaling: use alarms to trigger specific scaling adjustments.
+
+2. **Scheduled Scaling**
+   - Anticipate scaling based on known patterns.
+   - Predictive scaling: continuously forecast load and scale proactively. [Added by AI]
+
+**Good metrics to scale on:**
+- CPU Utilization
+- RequestCountPerTarget
+- Average Network In/Out
+- Custom CloudWatch metrics
+
+Scaling Cooldowns
+-----------------
+- After scaling, cooldown period (default 300s) prevents excessive launches/terminations.
+- Scaling ignored during cooldown.
+
+Tip: Use pre-baked AMIs to reduce configuration and deployment time.
+
+ELB SSL Certificates
+--------------------
+- SSL/TLS certificates enable encrypted communication between clients and servers.
+- SSL = Secure Sockets Layer (older), TLS = Transport Layer Security (newer).
+- TLS certificates are most commonly used today.
+- Certificates can be managed via ACM (AWS Certificate Manager) or manually uploaded.
+
+For HTTPS listeners:
+- Must specify a default certificate.
+- Optionally add multiple certificates for different domains.
+- Use SNI (Server Name Indication) for hostname-based certificate selection.
+- [Added by AI] You can enforce security policies defining TLS protocol versions and ciphers.
+
+Connection Draining (Deregistration Delay)
+------------------------------------------
+- Ensures in-flight requests complete before instance deregistration.
+- Default: 300 seconds (can be configured 1–3600s).
+- Prevents dropping requests during scaling or instance health changes.
+
+Sticky Sessions (Session Affinity)
+----------------------------------
+- Ensures a client is always routed to the same backend instance.
+- Works with ALB and NLB.
+- Cookie types:
+  - **Application-based cookies:** generated by the target or load balancer.
+  - **Duration-based cookies:** generated by the load balancer.
+- Cookie names: AWSALB (ALB), AWSELB (CLB - retired).
+
+Cross-Zone Load Balancing
+-------------------------
+- Distributes traffic evenly across instances in all AZs.
+- ALB: Enabled by default; no inter-AZ charge.
+- NLB & GWLB: Disabled by default; inter-AZ data transfer costs apply.
+
+Scalability and High Availability (HA)
+--------------------------------------
+Scalability allows systems to handle increasing load efficiently.
+
+**Types of scalability:**
+1. **Vertical Scaling (Scale up/down):**
+   - Increase/decrease instance size.
+   - Limited by hardware.
+   - Common for databases (RDS, ElastiCache).
+
+2. **Horizontal Scaling (Scale out/in):**
+   - Increase/decrease number of instances.
+   - Common for distributed systems (EC2, web apps).
+   - Works well with load balancers and ASG.
+
+High Availability ensures that applications are operational across multiple data centers (Availability Zones).
+
+**Types of high availability:**
+- **Passive:** Example – RDS Multi-AZ.
+- **Active:** Example – horizontally scaled EC2 instances with load balancing.
